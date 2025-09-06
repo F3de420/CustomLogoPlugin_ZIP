@@ -24,7 +24,7 @@ jobs:
       # Passo 2: Creazione dell'archivio zip del plugin.
       # L'azione 'thedoctor0/zip-release' è utilizzata per questa operazione.
       - name: Create Plugin Release Archive
-        uses: thedoctor0/zip-release@v1.1.2
+        - uses: thedoctor0/zip-release@main
         with:
           # Il tipo di archivio da creare.
           type: 'zip'
