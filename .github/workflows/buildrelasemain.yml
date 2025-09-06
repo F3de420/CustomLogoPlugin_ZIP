@@ -1,0 +1,52 @@
+# Nome del workflow, visibile nella scheda "Actions" del repository.
+name: Build & Release Plugin
+
+# Il workflow viene attivato da un evento di "push" (spinta)
+# solo se il push include un tag che inizia con "v" (es. v1.0.0).
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Definizione dei "job" che compongono il workflow.
+# Questo workflow contiene un unico job chiamato 'build'.
+jobs:
+  build:
+    # Specifica il sistema operativo sul quale il job verrà eseguito.
+    runs-on: ubuntu-latest
+
+    # Definizione dei passi che il job deve compiere.
+    steps:
+      # Passo 1: Checkout del codice del repository.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Passo 2: Creazione dell'archivio zip del plugin.
+      # L'azione 'thedoctor0/zip-release' è utilizzata per questa operazione.
+      - name: Create Plugin Release Archive
+        uses: thedoctor0/zip-release@main
+        with:
+          # Il tipo di archivio da creare.
+          type: 'zip'
+          # Il nome del file zip risultante.
+          filename: 'CustomLogoPlugin.zip'
+          # Elenco dei file e delle directory da escludere dall'archivio.
+          # È fondamentale escludere i file di configurazione di Git e Node.js
+          # per mantenere pulito il pacchetto del plugin.
+          exclusions: '*.git* /*node_modules/*.editorconfig.github'
+
+      # Passo 3: Creazione della release di GitHub e caricamento dell'artefatto.
+      # L'azione 'ncipollo/release-action' gestisce la creazione della release.
+      - name: Upload Release to GitHub
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          # Il nome del tag del push corrente.
+          tag: ${{ github.ref_name }}
+          # Il nome della release.
+          name: 'CustomLogoPlugin ${{ github.ref_name }}'
+          # Il percorso dell'artefatto da caricare.
+          artifacts: 'CustomLogoPlugin.zip'
+          # Il token di autenticazione fornito automaticamente da GitHub Actions.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Imposta la release come non "prerelease".
+          prerelease: false
